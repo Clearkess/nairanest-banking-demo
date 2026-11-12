@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession, isSameOrigin } from "@/lib/auth";
+import { enforceRateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 const schema = z.object({
   fullName: z.string().trim().min(2).max(100),
@@ -13,6 +14,8 @@ const schema = z.object({
 });
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  const rate = await enforceRateLimit(request, "register");
+  if (!rate.allowed) return NextResponse.json({ error: rate.unavailable ? "Service temporarily unavailable." : "Too many requests. Please try again later." }, { status: rate.unavailable ? 503 : 429 });
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Enter valid details. Passwords must be at least 12 characters and include uppercase, lowercase and a number." }, { status: 400 });
