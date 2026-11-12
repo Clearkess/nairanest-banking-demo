@@ -1,27 +1,40 @@
-# NairaNest — Nigerian Fintech Banking Demo
+# NairaNest
 
-A responsive, browser-based banking interface using fictional accounts and simulated transactions only.
+Modern digital banking interface and early full-stack foundation.
 
-## Run
-Open `index.html` in a modern browser. No build step, server, API key, or dependency install is required.
+## Current status
+This is a development preview, NOT a licensed bank or production-ready financial service. Registration and authentication routes require PostgreSQL. New customers and accounts are created in PENDING status. Internal transfers are denied unless both parties have ACTIVE accounts and VERIFIED KYC. The existing dashboard still displays illustrative values and is not connected to these APIs.
 
-## Demo logins
-- amara@example.test / demo1234
-- tayo@example.test / demo1234
-- zainab@example.test / demo1234
-- emeka@example.test / demo1234
+## Stack
+- Next.js 16 / React 19 / TypeScript
+- Tailwind CSS 4
+- PostgreSQL + Prisma
+- bcrypt password hashing and opaque server-side sessions
 
-## Included
-- Login/logout with sample users
-- Naira-denominated balances
-- Overview and transaction summaries
-- Transfers between fictional users
-- Transaction history
-- Beneficiary list
-- Virtual card preview
-- Profile page
-- Local browser persistence and reset controls
-- Responsive desktop/mobile layout
+## Local setup
+1. Use Node.js 20.9 or newer.
+2. Copy .env.example to .env and configure PostgreSQL.
+3. Install dependencies with npm install.
+4. Run npx prisma generate.
+5. Run npx prisma migrate dev --name initial.
+6. Start with npm run dev.
 
-## Safety and limitations
-This is a front-end demonstration. It does not connect to banks, payment rails, card networks, identity services, or external APIs. Transfers update only the local demo ledger in the browser. Credentials are intentionally demo-only and are not suitable for production authentication. Do not enter real personal, banking, or card information.
+## API routes
+- POST /api/auth/register
+- POST /api/auth/login
+- POST /api/auth/logout
+- GET /api/auth/me
+- POST /api/transfers/internal
+
+Registration requires fullName, email and a 12+ character password with uppercase, lowercase and a number. Optional phone is accepted. Authentication uses HttpOnly, SameSite=Strict cookies; sessions are stored as SHA-256 token hashes. Mutating routes reject cross-origin requests. Transfers use integer minor units, idempotency keys, a serializable database transaction and debit/credit entries.
+
+## Critical production work still required
+- Add distributed rate limiting, email verification, MFA/passkeys, password reset, session rotation and security event logging.
+- Add verified KYC/AML and sanctions-screening provider workflows; create audited staff approval controls.
+- Add database constraints and tests for ledger invariants, concurrency and reconciliation. Prove balance locking/serialization under load.
+- Integrate a licensed bank/payment institution in its sandbox, verify signed webhooks, implement settlement/reconciliation, reversals, fees, limits and provider idempotency.
+- Add card issuing through a licensed provider and never store PAN/CVV.
+- Add privacy controls, retention/deletion workflows, backups, monitoring, incident response, penetration testing and regulatory/legal approval.
+- Configure distributed rate limiting before exposing authentication endpoints publicly.
+
+Never use demo credentials, sample balances or illustrative dashboard transactions as real customer data. Do not accept deposits or enable live transfers until compliance, provider, operational and security work has been completed and independently tested.
