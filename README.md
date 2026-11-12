@@ -3,7 +3,7 @@
 Modern digital banking interface and early full-stack foundation.
 
 ## Current status
-This is a development preview, NOT a licensed bank or production-ready financial service. Registration and authentication routes require PostgreSQL. New customers and accounts are created in PENDING status. Internal transfers are denied unless both parties have ACTIVE accounts and VERIFIED KYC. The existing dashboard still displays illustrative values and is not connected to these APIs.
+This is a development preview, NOT a licensed bank or production-ready financial service. Registration and authentication routes require PostgreSQL. New customers and accounts are created in PENDING status. The authenticated `/dashboard` reads the signed-in customer's posted ledger entries; the public homepage remains a clearly labelled visual preview with illustrative figures. Internal transfers are denied unless both parties have ACTIVE accounts and VERIFIED KYC.
 
 ## Stack
 - Next.js 16 / React 19 / TypeScript
@@ -29,7 +29,7 @@ This is a development preview, NOT a licensed bank or production-ready financial
 Registration requires fullName, email and a 12+ character password with uppercase, lowercase and a number. Optional phone is accepted. Authentication uses HttpOnly, SameSite=Strict cookies; sessions are stored as SHA-256 token hashes. Mutating routes reject cross-origin requests. Transfers use integer minor units, idempotency keys, a serializable database transaction and debit/credit entries.
 
 ## Critical production work still required
-- Add distributed rate limiting, email verification, MFA/passkeys, password reset, session rotation and security event logging.
+- Add email verification, MFA/passkeys, password reset, session rotation and security event logging. Distributed Upstash sliding-window rate limits are implemented for login, registration and internal transfers; configure the Upstash credentials before production.
 - Add verified KYC/AML and sanctions-screening provider workflows; create audited staff approval controls.
 - Add database constraints and tests for ledger invariants, concurrency and reconciliation. Prove balance locking/serialization under load.
 - Integrate a licensed bank/payment institution in its sandbox, verify signed webhooks, implement settlement/reconciliation, reversals, fees, limits and provider idempotency.
