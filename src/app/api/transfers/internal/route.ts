@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getSessionUser, isSameOrigin } from "@/lib/auth";
+import { enforceRateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 const schema = z.object({
   fromAccountId: z.string().min(1),
@@ -13,6 +14,8 @@ const schema = z.object({
 });
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  const rate = await enforceRateLimit(request, "transfer");
+  if (!rate.allowed) return NextResponse.json({ error: rate.unavailable ? "Service temporarily unavailable." : "Too many requests. Please try again later." }, { status: rate.unavailable ? 503 : 429 });
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (user.status !== "ACTIVE" || user.kycStatus !== "VERIFIED") return NextResponse.json({ error: "Identity verification and account approval are required before transfers." }, { status: 403 });
