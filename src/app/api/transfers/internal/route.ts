@@ -39,8 +39,8 @@ export async function POST(request: Request) {
       ]);
       if (!source || !destination || destination.status !== "ACTIVE" || destination.user.status !== "ACTIVE" || destination.user.kycStatus !== "VERIFIED" || source.currency !== destination.currency || source.id === destination.id) throw new Error("ACCOUNT_UNAVAILABLE");
       const [debits, credits] = await Promise.all([
-        tx.ledgerEntry.aggregate({ where: { accountId: source.id, side: "DEBIT" }, _sum: { amountMinor: true } }),
-        tx.ledgerEntry.aggregate({ where: { accountId: source.id, side: "CREDIT" }, _sum: { amountMinor: true } })
+        tx.ledgerEntry.aggregate({ where: { accountId: source.id, side: "DEBIT", transaction: { status: "POSTED" } }, _sum: { amountMinor: true } }),
+        tx.ledgerEntry.aggregate({ where: { accountId: source.id, side: "CREDIT", transaction: { status: "POSTED" } }, _sum: { amountMinor: true } })
       ]);
       const available = (credits._sum.amountMinor ?? 0n) - (debits._sum.amountMinor ?? 0n);
       if (available < BigInt(amountMinor)) throw new Error("INSUFFICIENT_FUNDS");
