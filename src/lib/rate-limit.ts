@@ -2,11 +2,11 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 type Scope = "login" | "register" | "transfer";
-const policies: Record<Scope, { limit: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }> = {
+const policies = {
   login: { limit: 5, window: "15 m" },
   register: { limit: 3, window: "1 h" },
   transfer: { limit: 10, window: "1 m" }
-};
+} as const;
 let redis: Redis | null = null;
 const limiters = new Map<Scope, Ratelimit>();
 
