@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum UserStatus { PENDING ACTIVE SUSPENDED CLOSED }
+enum KycStatus { NOT_STARTED PENDING VERIFIED REJECTED }
+enum AccountStatus { PENDING ACTIVE FROZEN CLOSED }
+enum Currency { NGN USD GBP EUR }
+enum TransactionStatus { PENDING PROCESSING POSTED FAILED REVERSED }
+enum LedgerSide { DEBIT CREDIT }
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  fullName     String
+  phone        String?    @unique
+  status       UserStatus @default(PENDING)
+  kycStatus    KycStatus  @default(NOT_STARTED)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  accounts     Account[]
+  sessions     Session[]
+}
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+}
+model Account {
+  id                String        @id @default(cuid())
+  userId            String
+  internalReference String        @unique
+  currency          Currency      @default(NGN)
+  status            AccountStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  user              User          @relation(fields: [userId], references: [id])
+  entries           LedgerEntry[]
+  @@index([userId, status])
+}
+model LedgerTransaction {
+  id                 String            @id @default(cuid())
+  reference          String            @unique
+  idempotencyKey     String            @unique
+  requestFingerprint String
+  status             TransactionStatus @default(PENDING)
+  description        String
+  currency           Currency
+  createdAt          DateTime          @default(now())
+  postedAt           DateTime?
+  entries            LedgerEntry[]
+}
+model LedgerEntry {
+  id            String            @id @default(cuid())
+  transactionId String
+  accountId     String
+  side          LedgerSide
+  amountMinor   BigInt
+  createdAt     DateTime          @default(now())
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+  account       Account           @relation(fields: [accountId], references: [id])
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+}
