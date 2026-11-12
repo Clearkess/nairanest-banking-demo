@@ -5,12 +5,41 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-enum UserStatus { PENDING ACTIVE SUSPENDED CLOSED }
-enum KycStatus { NOT_STARTED PENDING VERIFIED REJECTED }
-enum AccountStatus { PENDING ACTIVE FROZEN CLOSED }
-enum Currency { NGN USD GBP EUR }
-enum TransactionStatus { PENDING PROCESSING POSTED FAILED REVERSED }
-enum LedgerSide { DEBIT CREDIT }
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+enum Currency {
+  NGN
+  USD
+  GBP
+  EUR
+}
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  POSTED
+  FAILED
+  REVERSED
+}
+enum LedgerSide {
+  DEBIT
+  CREDIT
+}
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
