@@ -19,7 +19,9 @@
     "next": "16.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "@upstash/ratelimit": "^2.0.6",
+    "@upstash/redis": "^1.35.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
