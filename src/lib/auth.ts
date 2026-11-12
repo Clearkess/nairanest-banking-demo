@@ -40,5 +40,8 @@ export async function destroySession() {
 export function isSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return false;
-  try { return new URL(origin).host === new URL(request.url).host; } catch { return false; }
+  try {
+    const allowedOrigin = process.env.APP_URL ? new URL(process.env.APP_URL).origin : new URL(request.url).origin;
+    return new URL(origin).origin === allowedOrigin;
+  } catch { return false; }
 }
