@@ -4,7 +4,7 @@ import { ArrowDownLeft, ArrowUpRight, ShieldCheck, Wallet, Clock3 } from "lucide
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 export const runtime="nodejs";
-const money=(minor:bigint,currency:string)=>new Intl.NumberFormat("en-NG",{style:"currency",currency,maximumFractionDigits:2}).format(Number(minor)/100);
+const money=(minor:bigint,currency:string)=>{const negative=minor<0n;const absolute=negative?-minor:minor;const whole=absolute/100n;const fraction=(absolute%100n).toString().padStart(2,"0");const formatted=new Intl.NumberFormat("en-NG",{style:"currency",currency,maximumFractionDigits:0}).format(whole);return (negative?"−":"")+formatted+"."+fraction;};
 export default async function DashboardPage(){
  const user=await getSessionUser(); if(!user) redirect("/login");
  const accounts=await db.account.findMany({where:{userId:user.id},include:{entries:{where:{transaction:{status:"POSTED"}},include:{transaction:{select:{reference:true,description:true,createdAt:true,currency:true,status:true}}},orderBy:{createdAt:"desc"}}},orderBy:{createdAt:"asc"}});
